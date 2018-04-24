@@ -1,0 +1,9 @@
+{
+  "editor.formatOnSave": true,
+  "javascript.validate.enable": false,
+  "typescript.validate.enable": false,
+  "eslint.validate": ["javascript", "javascriptreact", "vue"],
+  "files.associations": {
+    "*.html": "vue-html"
+  }
+}

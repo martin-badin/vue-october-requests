@@ -1,0 +1,53 @@
+{
+  "name": "vue-october-requests",
+  "version": "0.0.1",
+  "description": "October data attribute api for vuejs.",
+  "main": "dist/vue-october-requests.js",
+  "scripts": {
+    "build": "webpack --env dev && webpack --env build",
+    "test": "jest",
+    "test:watch":
+      "mocha --require babel-core/register --colors -w ./test/*.spec.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/martin-badin/vue-october-requests.git"
+  },
+  "keywords": [
+    "webpack",
+    "es6",
+    "starter",
+    "library",
+    "universal",
+    "umd",
+    "commonjs"
+  ],
+  "author": "Martin Badin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/martin-badin/vue-october-requests/issues"
+  },
+  "homepage": "https://github.com/martin-badin/vue-october-requests",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-eslint": "^8.0.3",
+    "babel-loader": "^7.1.2",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-flow": "^6.23.0",
+    "eslint": "^4.13.1",
+    "eslint-loader": "^1.9.0",
+    "eslint-plugin-flowtype": "^2.46.3",
+    "flow-bin": "^0.70.0",
+    "jest": "^22.4.3",
+    "vue": "^2.5.16",
+    "vue-template-compiler": "^2.5.16",
+    "vue-test-utils": "^1.0.0-beta.11",
+    "webpack": "^3.10.0"
+  },
+  "peerDependencies": {
+    "axios": "^0.18.0"
+  },
+  "dependencies": {}
+}
