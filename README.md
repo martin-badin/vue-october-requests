@@ -9,21 +9,7 @@ Supported input types are `text`, `email`, `password`, `hidden`, `tel` for now.
 import axios from "axios";
 import OctoberApi from "vue-october-requests";
 
-type PluginOptions = {
-  axios: Object
-};
-
 Vue.usage(OctoberApi, { axios });
-```
-
-```flow
-type AttrOptions = {
-  handler: string,
-  onError?: mixed => void,
-  onSuccess?: mixed => void,
-  onLoading?: boolean => void,
-  redirect?: string
-};
 ```
 
 ```vue
