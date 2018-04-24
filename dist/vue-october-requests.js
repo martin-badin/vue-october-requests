@@ -148,16 +148,6 @@ function prepareData(elements) {
   }, {});
 }
 
-// function extractPartials(update) {
-//   const result = [];
-
-//   for (const partial in update) {
-//     result.push(partial);
-//   }
-
-//   return result.join('&');
-// }
-
 module.exports = {
   init: function init(_ref) {
     var _this = this;
@@ -171,6 +161,10 @@ module.exports = {
 
     if (!value.handler || value.handler && !value.handler.match(/^(?:\w+\:{2})?on*/)) {
       throw new Error('Invalid handler name. The correct handler name format is: "onEvent".');
+    }
+
+    if (modifiers.files && typeof FormData === "undefined") {
+      throw new Error("This browser does not support file uploads via FormData.");
     }
 
     this.emit = function (name, data) {
@@ -189,9 +183,19 @@ module.exports = {
         event.preventDefault();
       }
 
+      var formData = void 0;
+
+      if (modifiers.files) {
+        // multipart/form-data
+        formData = new FormData(event.target);
+      } else {
+        // application/x-www-form-urlencoded
+        formData = qs(prepareData(event.target.elements));
+      }
+
       _this.emit("Loading", true);
 
-      instance.post("", qs(prepareData(event.target.elements)), {
+      instance.post("", formData, {
         headers: {
           "X-OCTOBER-REQUEST-HANDLER": value.handler
         }

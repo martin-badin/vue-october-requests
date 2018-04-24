@@ -10,7 +10,8 @@ type ErrorResponse = {
 };
 
 type Modifiers = {
-  prevent: boolean
+  prevent: boolean,
+  files: boolean
 };
 
 type Value = {
@@ -19,7 +20,6 @@ type Value = {
   onSuccess?: mixed => void,
   onLoading?: boolean => void,
   redirect?: string
-  // update?: { [key: string]: string },
 };
 
 type Binding = {
@@ -68,16 +68,6 @@ function prepareData(elements: Array<HTMLElement>): { [key: string]: string } {
   }, {});
 }
 
-// function extractPartials(update) {
-//   const result = [];
-
-//   for (const partial in update) {
-//     result.push(partial);
-//   }
-
-//   return result.join('&');
-// }
-
 module.exports = {
   init({ el, binding, instance }: Data) {
     const { modifiers, value } = binding;
@@ -88,6 +78,12 @@ module.exports = {
     ) {
       throw new Error(
         'Invalid handler name. The correct handler name format is: "onEvent".'
+      );
+    }
+
+    if (modifiers.files && typeof FormData === "undefined") {
+      throw new Error(
+        "This browser does not support file uploads via FormData."
       );
     }
 
@@ -107,10 +103,20 @@ module.exports = {
         event.preventDefault();
       }
 
+      let formData;
+
+      if (modifiers.files) {
+        // multipart/form-data
+        formData = new FormData(event.target);
+      } else {
+        // application/x-www-form-urlencoded
+        formData = qs(prepareData(event.target.elements));
+      }
+
       this.emit("Loading", true);
 
       instance
-        .post("", qs(prepareData(event.target.elements)), {
+        .post("", formData, {
           headers: {
             "X-OCTOBER-REQUEST-HANDLER": value.handler
           }
