@@ -9,7 +9,7 @@ Supported input types are `text`, `email`, `password`, `hidden`, `tel` for now.
 import axios from "axios";
 import OctoberApi from "vue-october-requests";
 
-Vue.usage(OctoberApi, { axios });
+Vue.use(OctoberApi, { axios });
 ```
 
 ```vue
