@@ -80,3 +80,19 @@ export default {
 };
 </script>
 ```
+
+or
+
+```js
+this.$request({
+  handler: "onSignin",
+  onLoading: onLoading,
+  onError: onError,
+  onSuccess: onSuccess,
+  redirect: "/"
+  data: {
+    foo: 'foo',
+    bar: 'bar'
+  }
+});
+```

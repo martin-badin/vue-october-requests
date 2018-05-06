@@ -1,5 +1,10 @@
 {
   "editor.formatOnSave": true,
+  "flow.enabled": true,
+  "flow.runOnEdit": true,
+  "flow.showStatus": true,
+  "flow.stopFlowOnExit": true,
+  "flow.useNPMPackagedFlow": true,
   "javascript.validate.enable": false,
   "typescript.validate.enable": false,
   "eslint.validate": ["javascript", "javascriptreact", "vue"],

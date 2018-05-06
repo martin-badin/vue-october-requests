@@ -18,6 +18,9 @@ module.exports = {
       headers: { "X-Requested-With": "XMLHttpRequest" }
     });
 
+    Vue.prototype.$request = (opts: Object) =>
+      request.request({ ...opts, instance });
+
     Vue.directive("october", {
       bind(el, binding) {
         if (binding.arg === "request") {

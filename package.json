@@ -1,6 +1,6 @@
 {
   "name": "vue-october-requests",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "October data attribute api for vuejs.",
   "main": "dist/vue-october-requests.js",
   "scripts": {
@@ -34,6 +34,7 @@
     "babel-eslint": "^8.0.3",
     "babel-loader": "^7.1.2",
     "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "babel-preset-flow": "^6.23.0",
     "eslint": "^4.13.1",

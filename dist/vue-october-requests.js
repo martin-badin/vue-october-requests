@@ -80,6 +80,8 @@ return /******/ (function(modules) { // webpackBootstrap
 "use strict";
 
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _request = __webpack_require__(1);
 
 var _request2 = _interopRequireDefault(_request);
@@ -99,6 +101,10 @@ module.exports = {
       timeout: 1000,
       headers: { "X-Requested-With": "XMLHttpRequest" }
     });
+
+    Vue.prototype.$request = function (opts) {
+      return _request2.default.request(_extends({}, opts, { instance: instance }));
+    };
 
     Vue.directive("october", {
       bind: function bind(el, binding) {
@@ -122,6 +128,10 @@ module.exports = {
 "use strict";
 
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
 var INPUTS = ["text", "email", "password", "hidden", "tel"];
 
 function qs(object) {
@@ -130,7 +140,7 @@ function qs(object) {
   }, "");
 }
 
-function prepareData(elements) {
+function prepareFormData(elements) {
   return Array.from(elements).reduce(function (acc, element) {
     switch (element.nodeName) {
       case "INPUT":
@@ -149,27 +159,28 @@ function prepareData(elements) {
 }
 
 module.exports = {
-  init: function init(_ref) {
+  request: function request(_ref) {
     var _this = this;
 
-    var el = _ref.el,
-        binding = _ref.binding,
-        instance = _ref.instance;
-    var modifiers = binding.modifiers,
-        value = binding.value;
+    var files = _ref.files,
+        instance = _ref.instance,
+        handler = _ref.handler,
+        redirect = _ref.redirect,
+        data = _ref.data,
+        event = _ref.event,
+        bag = _objectWithoutProperties(_ref, ["files", "instance", "handler", "redirect", "data", "event"]);
 
-
-    if (!value.handler || value.handler && !value.handler.match(/^(?:\w+\:{2})?on*/)) {
+    if (!handler || handler && !handler.match(/^(?:\w+\:{2})?on*/)) {
       throw new Error('Invalid handler name. The correct handler name format is: "onEvent".');
     }
 
-    if (modifiers.files && typeof FormData === "undefined") {
+    if (files && typeof FormData === "undefined") {
       throw new Error("This browser does not support file uploads via FormData.");
     }
 
     this.emit = function (name, data) {
       var eventName = "on" + name;
-      var func = value[eventName];
+      var func = bag[eventName];
 
       if (func && typeof func !== "function") {
         throw new Error("Event " + eventName + " must be type of function.");
@@ -178,45 +189,61 @@ module.exports = {
       }
     };
 
+    var formData = void 0;
+
+    if (files) {
+      // multipart/form-data
+      formData = new FormData(event.target);
+    } else {
+      // application/x-www-form-urlencoded
+      formData = qs(data);
+    }
+
+    this.emit("Loading", true);
+
+    instance.post("", formData, {
+      headers: {
+        "X-OCTOBER-REQUEST-HANDLER": handler
+      }
+    }).then(function (response) {
+      _this.emit("Success", response.data);
+
+      if (redirect) {
+        window.location.href = redirect;
+      } else if (response.data.X_OCTOBER_REDIRECT) {
+        window.location.href = response.data.X_OCTOBER_REDIRECT;
+      }
+    }).catch(function (err) {
+      var response = err.response;
+      _this.emit("Error", response.data);
+    }).finally(function () {
+      _this.emit("Loading", false);
+    });
+  },
+  init: function init(_ref2) {
+    var _this2 = this;
+
+    var el = _ref2.el,
+        binding = _ref2.binding,
+        instance = _ref2.instance;
+    var modifiers = binding.modifiers,
+        value = binding.value;
+
+
     el.addEventListener("submit", function (event) {
       if (modifiers.prevent) {
         event.preventDefault();
       }
 
-      var formData = void 0;
-
-      if (modifiers.files) {
-        // multipart/form-data
-        formData = new FormData(event.target);
-      } else {
-        // application/x-www-form-urlencoded
-        formData = qs(prepareData(event.target.elements));
-      }
-
-      _this.emit("Loading", true);
-
-      instance.post("", formData, {
-        headers: {
-          "X-OCTOBER-REQUEST-HANDLER": value.handler
-        }
-      }).then(function (response) {
-        _this.emit("Success", response.data);
-
-        if (value.redirect) {
-          window.location.href = value.redirect;
-        } else if (response.data.X_OCTOBER_REDIRECT) {
-          window.location.href = response.data.X_OCTOBER_REDIRECT;
-        }
-      }).catch(function (err) {
-        var response = err.response;
-        _this.emit("Error", response.data);
-      }).finally(function () {
-        _this.emit("Loading", false);
-      });
+      _this2.request(_extends({}, modifiers, value, {
+        instance: instance,
+        event: event,
+        data: prepareFormData(event.target.elements)
+      }));
     });
   },
-  destroy: function destroy(_ref2) {
-    var el = _ref2.el;
+  destroy: function destroy(_ref3) {
+    var el = _ref3.el;
 
     el.removeEventListener("submit");
   }

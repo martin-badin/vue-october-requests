@@ -47,7 +47,9 @@ function qs(object: Object) {
   }, "");
 }
 
-function prepareData(elements: Array<HTMLElement>): { [key: string]: string } {
+function prepareFormData(
+  elements: Array<HTMLElement>
+): { [key: string]: string } {
   return Array.from(elements).reduce((acc: Object, element: HTMLElement) => {
     switch (element.nodeName) {
       case "INPUT":
@@ -69,19 +71,22 @@ function prepareData(elements: Array<HTMLElement>): { [key: string]: string } {
 }
 
 module.exports = {
-  init({ el, binding, instance }: Data) {
-    const { modifiers, value } = binding;
-
-    if (
-      !value.handler ||
-      (value.handler && !value.handler.match(/^(?:\w+\:{2})?on*/))
-    ) {
+  request({
+    files,
+    instance,
+    handler,
+    redirect,
+    data,
+    event,
+    ...bag
+  }: Value & Modifiers & { event: HTMLFormElement }) {
+    if (!handler || (handler && !handler.match(/^(?:\w+\:{2})?on*/))) {
       throw new Error(
         'Invalid handler name. The correct handler name format is: "onEvent".'
       );
     }
 
-    if (modifiers.files && typeof FormData === "undefined") {
+    if (files && typeof FormData === "undefined") {
       throw new Error(
         "This browser does not support file uploads via FormData."
       );
@@ -89,7 +94,7 @@ module.exports = {
 
     this.emit = (name, data) => {
       const eventName = `on${name}`;
-      const func = value[eventName];
+      const func = bag[eventName];
 
       if (func && typeof func !== "function") {
         throw new Error(`Event ${eventName} must be type of function.`);
@@ -98,45 +103,56 @@ module.exports = {
       }
     };
 
+    let formData;
+
+    if (files) {
+      // multipart/form-data
+      formData = new FormData(event.target);
+    } else {
+      // application/x-www-form-urlencoded
+      formData = qs(data);
+    }
+
+    this.emit("Loading", true);
+
+    instance
+      .post("", formData, {
+        headers: {
+          "X-OCTOBER-REQUEST-HANDLER": handler
+        }
+      })
+      .then((response: { data: SuccessResponse }) => {
+        this.emit("Success", response.data);
+
+        if (redirect) {
+          window.location.href = redirect;
+        } else if (response.data.X_OCTOBER_REDIRECT) {
+          window.location.href = response.data.X_OCTOBER_REDIRECT;
+        }
+      })
+      .catch(err => {
+        const response: { data: ErrorResponse } = err.response;
+        this.emit("Error", response.data);
+      })
+      .finally(() => {
+        this.emit("Loading", false);
+      });
+  },
+  init({ el, binding, instance }: Data) {
+    const { modifiers, value } = binding;
+
     el.addEventListener("submit", (event: Event) => {
       if (modifiers.prevent) {
         event.preventDefault();
       }
 
-      let formData;
-
-      if (modifiers.files) {
-        // multipart/form-data
-        formData = new FormData(event.target);
-      } else {
-        // application/x-www-form-urlencoded
-        formData = qs(prepareData(event.target.elements));
-      }
-
-      this.emit("Loading", true);
-
-      instance
-        .post("", formData, {
-          headers: {
-            "X-OCTOBER-REQUEST-HANDLER": value.handler
-          }
-        })
-        .then((response: { data: SuccessResponse }) => {
-          this.emit("Success", response.data);
-
-          if (value.redirect) {
-            window.location.href = value.redirect;
-          } else if (response.data.X_OCTOBER_REDIRECT) {
-            window.location.href = response.data.X_OCTOBER_REDIRECT;
-          }
-        })
-        .catch(err => {
-          const response: { data: ErrorResponse } = err.response;
-          this.emit("Error", response.data);
-        })
-        .finally(() => {
-          this.emit("Loading", false);
-        });
+      this.request({
+        ...modifiers,
+        ...value,
+        instance,
+        event,
+        data: prepareFormData(event.target.elements)
+      });
     });
   },
   destroy({ el }: Data) {
