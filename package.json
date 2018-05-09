@@ -1,26 +1,22 @@
 {
   "name": "vue-october-requests",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "October data attribute api for vuejs.",
   "main": "dist/vue-october-requests.js",
   "scripts": {
-    "build": "webpack --env dev && webpack --env build",
-    "test": "jest",
-    "test:watch":
-      "mocha --require babel-core/register --colors -w ./test/*.spec.js"
+    "build": "webpack --env dev && webpack --env build"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/martin-badin/vue-october-requests.git"
   },
   "keywords": [
-    "webpack",
-    "es6",
-    "starter",
-    "library",
-    "universal",
-    "umd",
-    "commonjs"
+    "vue",
+    "octobercms",
+    "octobercms data attribute api",
+    "octobercms data api",
+    "data api",
+    "october data attribute api"
   ],
   "author": "Martin Badin",
   "license": "MIT",
@@ -29,6 +25,7 @@
   },
   "homepage": "https://github.com/martin-badin/vue-october-requests",
   "devDependencies": {
+    "axios": "^0.18.0",
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
     "babel-eslint": "^8.0.3",
@@ -46,9 +43,5 @@
     "vue-template-compiler": "^2.5.16",
     "vue-test-utils": "^1.0.0-beta.11",
     "webpack": "^3.10.0"
-  },
-  "peerDependencies": {
-    "axios": "^0.18.0"
-  },
-  "dependencies": {}
+  }
 }

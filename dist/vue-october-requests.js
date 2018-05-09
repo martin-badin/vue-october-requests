@@ -82,11 +82,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _request = __webpack_require__(1);
-
-var _request2 = _interopRequireDefault(_request);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _request2 = __webpack_require__(1);
 
 module.exports = {
   install: function install(Vue) {
@@ -102,19 +98,48 @@ module.exports = {
       headers: { "X-Requested-With": "XMLHttpRequest" }
     });
 
-    Vue.prototype.$request = function (opts) {
-      return _request2.default.request(_extends({}, opts, { instance: instance }));
+    Vue.prototype.$october = {
+      request: function request() {
+        var props = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+        if (!props.formData && !props.handler) {
+          throw new Error("Props the formData and the handler are required");
+        }
+
+        if (!props.formData || props.formData && !(props.formData instanceof FormData)) {
+          throw new Error("The formData is not instance of FormData");
+        }
+
+        return (0, _request2.request)(_extends({}, props, { instance: instance }));
+      }
     };
 
     Vue.directive("october", {
       bind: function bind(el, binding) {
         if (binding.arg === "request") {
-          _request2.default.init({ el: el, binding: binding, instance: instance });
+          var modifiers = binding.modifiers,
+              value = binding.value;
+
+
+          if (!(el instanceof HTMLFormElement)) {
+            throw new Error("The element is not instance of HTMLFormElement");
+          }
+
+          el.addEventListener("submit", function (event) {
+            if (modifiers.prevent) {
+              event.preventDefault();
+            }
+
+            (0, _request2.request)(_extends({}, modifiers, value, {
+              instance: instance,
+              formData: new FormData(event.target)
+            }));
+          });
         }
       },
       unbind: function unbind(el, binding) {
         if (binding.arg === "request") {
-          _request2.default.destroy({ el: el });
+          el.removeEventListener("submit");
         }
       }
     });
@@ -128,126 +153,60 @@ module.exports = {
 "use strict";
 
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.request = request;
 
 function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
-var INPUTS = ["text", "email", "password", "hidden", "tel"];
+function request(_ref) {
+  var formData = _ref.formData,
+      handler = _ref.handler,
+      instance = _ref.instance,
+      redirect = _ref.redirect,
+      bag = _objectWithoutProperties(_ref, ["formData", "handler", "instance", "redirect"]);
 
-function qs(object) {
-  return Object.keys(object).reduce(function (str, key, i) {
-    return [str, i === 0 ? "" : "&", encodeURIComponent(key), "=", encodeURIComponent(object[key])].join("");
-  }, "");
-}
-
-function prepareFormData(elements) {
-  return Array.from(elements).reduce(function (acc, element) {
-    switch (element.nodeName) {
-      case "INPUT":
-        if (INPUTS.includes(element.type)) {
-          acc[element.name] = element.value;
-        }
-        break;
-      case "BUTTON":
-        break;
-      default:
-        console.warn("[Vue October Request] not supported element type: ", element.nodeName);
-    }
-
-    return acc;
-  }, {});
-}
-
-module.exports = {
-  request: function request(_ref) {
-    var _this = this;
-
-    var files = _ref.files,
-        instance = _ref.instance,
-        handler = _ref.handler,
-        redirect = _ref.redirect,
-        data = _ref.data,
-        event = _ref.event,
-        bag = _objectWithoutProperties(_ref, ["files", "instance", "handler", "redirect", "data", "event"]);
-
-    if (!handler || handler && !handler.match(/^(?:\w+\:{2})?on*/)) {
-      throw new Error('Invalid handler name. The correct handler name format is: "onEvent".');
-    }
-
-    if (files && typeof FormData === "undefined") {
-      throw new Error("This browser does not support file uploads via FormData.");
-    }
-
-    this.emit = function (name, data) {
-      var eventName = "on" + name;
-      var func = bag[eventName];
-
-      if (func && typeof func !== "function") {
-        throw new Error("Event " + eventName + " must be type of function.");
-      } else if (func) {
-        func(data);
-      }
-    };
-
-    var formData = void 0;
-
-    if (files) {
-      // multipart/form-data
-      formData = new FormData(event.target);
-    } else {
-      // application/x-www-form-urlencoded
-      formData = qs(data);
-    }
-
-    this.emit("Loading", true);
-
-    instance.post("", formData, {
-      headers: {
-        "X-OCTOBER-REQUEST-HANDLER": handler
-      }
-    }).then(function (response) {
-      _this.emit("Success", response.data);
-
-      if (redirect) {
-        window.location.href = redirect;
-      } else if (response.data.X_OCTOBER_REDIRECT) {
-        window.location.href = response.data.X_OCTOBER_REDIRECT;
-      }
-    }).catch(function (err) {
-      var response = err.response;
-      _this.emit("Error", response.data);
-    }).finally(function () {
-      _this.emit("Loading", false);
-    });
-  },
-  init: function init(_ref2) {
-    var _this2 = this;
-
-    var el = _ref2.el,
-        binding = _ref2.binding,
-        instance = _ref2.instance;
-    var modifiers = binding.modifiers,
-        value = binding.value;
-
-
-    el.addEventListener("submit", function (event) {
-      if (modifiers.prevent) {
-        event.preventDefault();
-      }
-
-      _this2.request(_extends({}, modifiers, value, {
-        instance: instance,
-        event: event,
-        data: prepareFormData(event.target.elements)
-      }));
-    });
-  },
-  destroy: function destroy(_ref3) {
-    var el = _ref3.el;
-
-    el.removeEventListener("submit");
+  if (!handler || handler && !handler.match(/^(?:\w+\:{2})?on*/)) {
+    throw new Error('Invalid handler name. The correct handler name format is: "onEvent".');
   }
-};
+
+  if (!(formData instanceof FormData)) {
+    throw new Error("The FormData is not instance of FormData");
+  }
+
+  function emit(name, data) {
+    var eventName = "on" + name;
+    var func = bag[eventName];
+
+    if (func && typeof func !== "function") {
+      throw new Error("Event " + eventName + " must be type of function.");
+    } else if (func) {
+      func(data);
+    }
+  }
+
+  emit("Loading", true);
+
+  instance.post("", formData, {
+    headers: {
+      "X-OCTOBER-REQUEST-HANDLER": handler
+    }
+  }).then(function (response) {
+    emit("Success", response.data);
+
+    if (redirect) {
+      window.location.href = redirect;
+    } else if (response.data.X_OCTOBER_REDIRECT) {
+      window.location.href = response.data.X_OCTOBER_REDIRECT;
+    }
+  }).catch(function (err) {
+    var response = err.response;
+    emit("Error", response.data);
+  }).finally(function () {
+    emit("Loading", false);
+  });
+}
 
 /***/ })
 /******/ ]);

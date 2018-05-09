@@ -1,7 +1,6 @@
 # OctoberCMS data attribute API for vuejs
 
 Simple implementation data attribute api for vuejs.
-Supported input types are `text`, `email`, `password`, `hidden`, `tel` for now.
 
 ## Usage
 
@@ -11,6 +10,8 @@ import OctoberApi from "vue-october-requests";
 
 Vue.use(OctoberApi, { axios });
 ```
+
+1.  using form element
 
 ```vue
 <template>
@@ -81,18 +82,26 @@ export default {
 </script>
 ```
 
-or
+2.  using javascript function
 
 ```js
-this.$request({
-  handler: "onSignin",
-  onLoading: onLoading,
-  onError: onError,
-  onSuccess: onSuccess,
-  redirect: "/"
-  data: {
-    foo: 'foo',
-    bar: 'bar'
+new Vue({
+  el: "#v-app",
+  methods: {
+    onSubmit(input: string) {
+      const formData = new FormData();
+
+      formData.append("input", input);
+
+      this.$october.request({
+        handler: "onSubmit",
+        formData
+        // onLoading: onLoading,
+        // onError: onError,
+        // onSuccess: onSuccess,
+        // redirect: "/"
+      });
+    }
   }
 });
 ```
