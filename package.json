@@ -1,6 +1,6 @@
 {
   "name": "vue-october-requests",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "October data attribute api for vuejs.",
   "main": "dist/vue-october-requests.js",
   "scripts": {

@@ -25,7 +25,7 @@ type Value = {
 
 export type Props = Value & Modifiers;
 
-type RequestProps = Props & { instance: AxiosInstance, formData: FormData };
+type RequestProps = Props & { instance: AxiosInstance, formData?: FormData };
 
 export function request({
   formData,
@@ -40,8 +40,8 @@ export function request({
     );
   }
 
-  if (!(formData instanceof FormData)) {
-    throw new Error("The FormData is not instance of FormData");
+  if (formData && !(formData instanceof FormData)) {
+    throw new Error("The formData is not instance of FormData");
   }
 
   function emit(name, data) {
@@ -58,7 +58,7 @@ export function request({
   emit("Loading", true);
 
   instance
-    .post("", formData, {
+    .post("", formData || null, {
       headers: {
         "X-OCTOBER-REQUEST-HANDLER": handler
       }

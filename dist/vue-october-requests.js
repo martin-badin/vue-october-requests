@@ -102,14 +102,6 @@ module.exports = {
       request: function request() {
         var props = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-        if (!props.formData && !props.handler) {
-          throw new Error("Props the formData and the handler are required");
-        }
-
-        if (!props.formData || props.formData && !(props.formData instanceof FormData)) {
-          throw new Error("The formData is not instance of FormData");
-        }
-
         return (0, _request2.request)(_extends({}, props, { instance: instance }));
       }
     };
@@ -171,8 +163,8 @@ function request(_ref) {
     throw new Error('Invalid handler name. The correct handler name format is: "onEvent".');
   }
 
-  if (!(formData instanceof FormData)) {
-    throw new Error("The FormData is not instance of FormData");
+  if (formData && !(formData instanceof FormData)) {
+    throw new Error("The formData is not instance of FormData");
   }
 
   function emit(name, data) {
@@ -188,7 +180,7 @@ function request(_ref) {
 
   emit("Loading", true);
 
-  instance.post("", formData, {
+  instance.post("", formData || null, {
     headers: {
       "X-OCTOBER-REQUEST-HANDLER": handler
     }

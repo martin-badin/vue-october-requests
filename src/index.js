@@ -22,17 +22,6 @@ module.exports = {
 
     Vue.prototype.$october = {
       request(props: Props & { formData: FormData } = {}) {
-        if (!props.formData && !props.handler) {
-          throw new Error("Props the formData and the handler are required");
-        }
-
-        if (
-          !props.formData ||
-          (props.formData && !(props.formData instanceof FormData))
-        ) {
-          throw new Error("The formData is not instance of FormData");
-        }
-
         return request({ ...props, instance });
       }
     };
