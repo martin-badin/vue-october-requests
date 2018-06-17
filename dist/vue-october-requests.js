@@ -94,7 +94,7 @@ module.exports = {
 
     var instance = options.axios.create({
       baseURL: window.location.href,
-      timeout: 1000,
+      timeout: options.timeout || 1000,
       headers: { "X-Requested-With": "XMLHttpRequest" }
     });
 
@@ -109,20 +109,16 @@ module.exports = {
     Vue.directive("october", {
       bind: function bind(el, binding) {
         if (binding.arg === "request") {
-          var modifiers = binding.modifiers,
-              value = binding.value;
-
-
           if (!(el instanceof HTMLFormElement)) {
             throw new Error("The element is not instance of HTMLFormElement");
           }
 
           el.addEventListener("submit", function (event) {
-            if (modifiers.prevent) {
+            if (binding.modifiers.prevent) {
               event.preventDefault();
             }
 
-            (0, _request2.request)(_extends({}, modifiers, value, {
+            (0, _request2.request)(_extends({}, binding.modifiers, binding.value, {
               instance: instance,
               formData: new FormData(event.target)
             }));
@@ -193,8 +189,7 @@ function request(_ref) {
       window.location.href = response.data.X_OCTOBER_REDIRECT;
     }
   }).catch(function (err) {
-    var response = err.response;
-    emit("Error", response.data);
+    emit("Error", err.response.data);
   }).finally(function () {
     emit("Loading", false);
   });

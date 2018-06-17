@@ -1,31 +1,6 @@
 // @flow
 
-import type { AxiosInstance } from "axios";
-
-type SuccessResponse = {
-  X_OCTOBER_REDIRECT: string
-};
-
-type ErrorResponse = {
-  X_OCTOBER_ERROR_FIELDS: { [key: string]: string },
-  X_OCTOBER_ERROR_MESSAGE: string
-};
-
-type Modifiers = {
-  prevent: boolean
-};
-
-type Value = {
-  handler: string,
-  onError?: mixed => void,
-  onLoading?: boolean => void,
-  onSuccess?: mixed => void,
-  redirect?: string
-};
-
-export type Props = Value & Modifiers;
-
-type RequestProps = Props & { instance: AxiosInstance, formData?: FormData };
+import type { SuccessResponse, RequestProps } from "../types";
 
 export function request({
   formData,
@@ -44,7 +19,7 @@ export function request({
     throw new Error("The formData is not instance of FormData");
   }
 
-  function emit(name, data) {
+  function emit(name: string, data: mixed) {
     const eventName = `on${name}`;
     const func = bag[eventName];
 
@@ -73,8 +48,7 @@ export function request({
       }
     })
     .catch(err => {
-      const response: { data: ErrorResponse } = err.response;
-      emit("Error", response.data);
+      emit("Error", err.response.data);
     })
     .finally(() => {
       emit("Loading", false);
