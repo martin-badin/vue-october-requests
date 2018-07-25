@@ -169,9 +169,9 @@ function request(_ref) {
 
     if (func && typeof func !== "function") {
       throw new Error("Event " + eventName + " must be type of function.");
-    } else if (func) {
-      func(data);
     }
+
+    func(data);
   }
 
   emit("Loading", true);
@@ -181,7 +181,7 @@ function request(_ref) {
       "X-OCTOBER-REQUEST-HANDLER": handler
     }
   }).then(function (response) {
-    emit("Success", response.data);
+    emit("Success", response);
 
     if (redirect) {
       window.location.href = redirect;
@@ -189,7 +189,7 @@ function request(_ref) {
       window.location.href = response.data.X_OCTOBER_REDIRECT;
     }
   }).catch(function (err) {
-    emit("Error", err.response.data);
+    emit("Error", err);
   }).finally(function () {
     emit("Loading", false);
   });

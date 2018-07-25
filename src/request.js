@@ -25,9 +25,9 @@ export function request({
 
     if (func && typeof func !== "function") {
       throw new Error(`Event ${eventName} must be type of function.`);
-    } else if (func) {
-      func(data);
     }
+
+    func(data);
   }
 
   emit("Loading", true);
@@ -39,7 +39,7 @@ export function request({
       }
     })
     .then((response: { data: SuccessResponse }) => {
-      emit("Success", response.data);
+      emit("Success", response);
 
       if (redirect) {
         window.location.href = redirect;
@@ -48,7 +48,7 @@ export function request({
       }
     })
     .catch(err => {
-      emit("Error", err.response.data);
+      emit("Error", err);
     })
     .finally(() => {
       emit("Loading", false);
