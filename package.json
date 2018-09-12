@@ -1,6 +1,6 @@
 {
   "name": "vue-october-requests",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "October data attribute api for vuejs.",
   "main": "dist/vue-october-requests.js",
   "scripts": {
@@ -8,8 +8,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/martin-badin/vue-october-requests.git"
+    "url": "git+https://github.com/martin-badin/vue-october-requests.git"
   },
+  "bugs": {
+    "url": "https://github.com/martin-badin/vue-october-requests/issues"
+  },
+  "homepage": "https://github.com/martin-badin/vue-october-requests/blob/master/README.md",
   "keywords": [
     "vue",
     "octobercms",
@@ -20,10 +24,6 @@
   ],
   "author": "Martin Badin",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/martin-badin/vue-october-requests/issues"
-  },
-  "homepage": "https://github.com/martin-badin/vue-october-requests",
   "devDependencies": {
     "axios": "^0.18.0",
     "babel-cli": "^6.26.0",
