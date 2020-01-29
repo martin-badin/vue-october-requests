@@ -1,6 +1,28 @@
-// @flow
+import { AxiosResponse, AxiosInstance } from "axios";
 
-import type { SuccessResponse, RequestProps } from "../types";
+export interface SuccessResponse {
+  readonly X_OCTOBER_REDIRECT: string;
+}
+
+export interface ErrorResponse {
+  readonly X_OCTOBER_ERROR_FIELDS: Readonly<Record<string, string>>;
+  readonly X_OCTOBER_ERROR_MESSAGE: string;
+}
+
+export interface RequestProps {
+  readonly formData: FormData;
+  readonly handler: string;
+  readonly instance: AxiosInstance;
+  readonly onError?: (value: any) => void;
+  readonly onLoading?: (value: boolean) => void;
+  readonly onSuccess?: (value: any) => void;
+  readonly prevent: boolean;
+  readonly redirect?: string;
+}
+
+export type RequestFunction = {
+  (options: RequestProps): () => void;
+};
 
 export function request({
   formData,
@@ -19,9 +41,9 @@ export function request({
     throw new Error("The formData is not instance of FormData");
   }
 
-  function emit(name: string, data: mixed) {
+  function emit<T>(name: "Loading" | "Error" | "Success", data: T) {
     const eventName = `on${name}`;
-    const func = bag[eventName];
+    const func = (bag as Record<string, any>)[eventName];
 
     if (func && typeof func !== "function") {
       throw new Error(`Event ${eventName} must be type of function.`);
@@ -38,7 +60,7 @@ export function request({
         "X-OCTOBER-REQUEST-HANDLER": handler
       }
     })
-    .then((response: { data: SuccessResponse }) => {
+    .then((response: AxiosResponse<SuccessResponse>) => {
       emit("Success", response);
 
       if (redirect) {
@@ -46,11 +68,11 @@ export function request({
       } else if (response.data.X_OCTOBER_REDIRECT) {
         window.location.href = response.data.X_OCTOBER_REDIRECT;
       }
+
+      emit("Loading", false);
     })
     .catch(err => {
       emit("Error", err);
-    })
-    .finally(() => {
       emit("Loading", false);
     });
 }
