@@ -10,7 +10,7 @@ export interface ErrorResponse {
 }
 
 export interface RequestProps {
-  readonly formData: FormData;
+  readonly formData: FormData | null;
   readonly handler: string;
   readonly instance: AxiosInstance;
   readonly onError?: (value: any) => void;
@@ -24,6 +24,17 @@ export type RequestFunction = {
   (options: RequestProps): () => void;
 };
 
+export const ERROR_MESSAGES = {
+  "handle.required": "Handler name is required",
+  "handle.invalid":
+    'Invalid handler name. The correct handler name format is: "onEvent".',
+
+  "formData.invalid": "The formData is not instance of FormData",
+
+  "event.not.defined": (value: string) =>
+    `Event ${value} must be type of function.`
+};
+
 export function request({
   formData,
   handler,
@@ -31,22 +42,24 @@ export function request({
   redirect,
   ...bag
 }: RequestProps) {
-  if (!handler || (handler && !handler.match(/^(?:\w+\:{2})?on*/))) {
-    throw new Error(
-      'Invalid handler name. The correct handler name format is: "onEvent".'
-    );
+  if (!handler) {
+    throw new Error(ERROR_MESSAGES["handle.required"]);
+  }
+
+  if (handler && !handler.match(/^(?:\w+\:{2})?on*/)) {
+    throw new Error(ERROR_MESSAGES["handle.invalid"]);
   }
 
   if (formData && !(formData instanceof FormData)) {
-    throw new Error("The formData is not instance of FormData");
+    throw new Error(ERROR_MESSAGES["formData.invalid"]);
   }
 
-  function emit<T>(name: "Loading" | "Error" | "Success", data: T) {
+  function emit<T>(name: "Loading" | "Error" | "Success", data: T | undefined) {
     const eventName = `on${name}`;
     const func = (bag as Record<string, any>)[eventName];
 
-    if (func && typeof func !== "function") {
-      throw new Error(`Event ${eventName} must be type of function.`);
+    if (typeof func !== "function") {
+      throw new Error(ERROR_MESSAGES["event.not.defined"](eventName));
     }
 
     func(data);
@@ -55,7 +68,7 @@ export function request({
   emit("Loading", true);
 
   instance
-    .post("", formData || null, {
+    .post("", formData, {
       headers: {
         "X-OCTOBER-REQUEST-HANDLER": handler
       }

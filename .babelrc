@@ -1,4 +1,19 @@
 {
   "presets": ["@babel/env"],
-  "plugins": ["@babel/plugin-syntax-object-rest-spread"]
+  "plugins": ["@babel/plugin-syntax-object-rest-spread"],
+  "env": {
+    "test": {
+      "presets": [
+        [
+          "@babel/preset-env",
+          {
+            "targets": {
+              "node": "current"
+            }
+          }
+        ],
+        "@babel/preset-typescript"
+      ]
+    }
+  }
 }
