@@ -18,4 +18,18 @@ describe("plugin", () => {
   it("has request function", () => {
     expect(app.$october.request).toBeInstanceOf(Function);
   });
+
+  describe("request", () => {
+    it("first parameter is string", () => {
+      const mockFn = jest.fn(app.$october.request);
+      const payload = {
+        formData: new FormData(),
+        prevent: true
+      };
+
+      mockFn("onLoad", payload);
+
+      expect(mockFn).toBeCalledWith("onLoad", payload);
+    });
+  });
 });

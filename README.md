@@ -17,11 +17,11 @@ Vue.use(OctoberApi, { axios });
 <template>
   <form
     v-october:request.prevent="{
-      'handler': 'onSignin',
-      'onLoading': onLoading,
-      'onError': onError,
-      'onSuccess': onSuccess,
-      'redirect': '/'
+      handler: 'onSignin',
+      onLoading: onLoading,
+      onError: onError,
+      onSuccess: onSuccess,
+      redirect: '/'
     }"
   >
     <text-input
@@ -39,10 +39,7 @@ Vue.use(OctoberApi, { axios });
       type="password"
     />
 
-    <button
-      :disabled="errors.any()"
-      type="submit"
-    >Login</button>
+    <button :disabled="errors.any()" type="submit">Login</button>
   </form>
 </template>
 
@@ -93,8 +90,7 @@ new Vue({
 
       formData.append("input", input);
 
-      this.$october.request({
-        handler: "onSubmit",
+      this.$october.request("onSubmit", {
         formData
         // onLoading: onLoading,
         // onError: onError,

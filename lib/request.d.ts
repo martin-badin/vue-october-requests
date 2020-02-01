@@ -7,16 +7,22 @@ export interface ErrorResponse {
     readonly X_OCTOBER_ERROR_MESSAGE: string;
 }
 export interface RequestProps {
-    readonly formData: FormData;
-    readonly handler: string;
-    readonly instance: AxiosInstance;
+    readonly formData: FormData | null;
     readonly onError?: (value: any) => void;
     readonly onLoading?: (value: boolean) => void;
     readonly onSuccess?: (value: any) => void;
     readonly prevent: boolean;
     readonly redirect?: string;
 }
-export declare type RequestFunction = {
-    (options: RequestProps): () => void;
+export declare const ERROR_MESSAGES: {
+    "handler.required": string;
+    "handler.invalid": string;
+    "formData.invalid": string;
+    "event.not.defined": (value: string) => string;
 };
-export declare function request({ formData, handler, instance, redirect, ...bag }: RequestProps): void;
+interface Props {
+    readonly handler: string;
+    readonly instance: AxiosInstance;
+}
+export declare function request({ formData, instance, handler, redirect, ...bag }: RequestProps & Props): void;
+export {};

@@ -1,13 +1,17 @@
 import { AxiosInstance, AxiosStatic } from "axios";
 import { PluginObject } from "vue/types/plugin";
 import { DirectiveBinding } from "vue/types/options";
-import { request, RequestProps, RequestFunction } from "./request";
+import { request, RequestProps, ERROR_MESSAGES } from "./request";
 
 export interface PluginOptions {
   readonly axios: AxiosStatic;
   readonly timeout?: number;
   readonly headers?: Readonly<Record<string, string>>;
 }
+
+export type RequestFunction = {
+  (handler: string, options: RequestProps): () => void;
+};
 
 const plugin = {
   install: (Vue, pluginOptions) => {
@@ -32,8 +36,12 @@ const plugin = {
     });
 
     Vue.prototype.$october = {
-      request(props: RequestProps) {
-        return request({ ...props, instance });
+      request(h: string, p: RequestProps) {
+        if (typeof h !== "string") {
+          throw new Error(ERROR_MESSAGES["handler.required"]);
+        }
+
+        return request({ ...p, handler: h, instance });
       }
     };
 

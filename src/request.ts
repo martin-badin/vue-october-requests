@@ -11,8 +11,6 @@ export interface ErrorResponse {
 
 export interface RequestProps {
   readonly formData: FormData | null;
-  readonly handler: string;
-  readonly instance: AxiosInstance;
   readonly onError?: (value: any) => void;
   readonly onLoading?: (value: boolean) => void;
   readonly onSuccess?: (value: any) => void;
@@ -20,13 +18,9 @@ export interface RequestProps {
   readonly redirect?: string;
 }
 
-export type RequestFunction = {
-  (options: RequestProps): () => void;
-};
-
 export const ERROR_MESSAGES = {
-  "handle.required": "Handler name is required",
-  "handle.invalid":
+  "handler.required": "Handler name is required",
+  "handler.invalid":
     'Invalid handler name. The correct handler name format is: "onEvent".',
 
   "formData.invalid": "The formData is not instance of FormData",
@@ -35,19 +29,24 @@ export const ERROR_MESSAGES = {
     `Event ${value} must be type of function.`
 };
 
+interface Props {
+  readonly handler: string;
+  readonly instance: AxiosInstance;
+}
+
 export function request({
   formData,
-  handler,
   instance,
+  handler,
   redirect,
   ...bag
-}: RequestProps) {
+}: RequestProps & Props) {
   if (!handler) {
-    throw new Error(ERROR_MESSAGES["handle.required"]);
+    throw new Error(ERROR_MESSAGES["handler.required"]);
   }
 
   if (handler && !handler.match(/^(?:\w+\:{2})?on*/)) {
-    throw new Error(ERROR_MESSAGES["handle.invalid"]);
+    throw new Error(ERROR_MESSAGES["handler.invalid"]);
   }
 
   if (formData && !(formData instanceof FormData)) {
@@ -58,11 +57,13 @@ export function request({
     const eventName = `on${name}`;
     const func = (bag as Record<string, any>)[eventName];
 
-    if (typeof func !== "function") {
-      throw new Error(ERROR_MESSAGES["event.not.defined"](eventName));
-    }
+    if (func) {
+      if (typeof func !== "function") {
+        throw new Error(ERROR_MESSAGES["event.not.defined"](eventName));
+      }
 
-    func(data);
+      func(data);
+    }
   }
 
   emit("Loading", true);

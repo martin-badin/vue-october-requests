@@ -1,11 +1,11 @@
 {
   "name": "vue-october-requests",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "October data attribute api for vuejs.",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
-    "build": "webpack --env dev && webpack --env build",
+    "build": "webpack",
     "test": "jest"
   },
   "repository": {
